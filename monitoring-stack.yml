@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  dotnetapplication: #your dotnet application
+    image: dotnetapplication
+    ports:
+      - 5000:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - monitoring-network
+
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    volumes:
+      - ./data/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/etc/prometheus
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=P@ssw0rd
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    networks:
+      - monitoring-network
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring-network:
